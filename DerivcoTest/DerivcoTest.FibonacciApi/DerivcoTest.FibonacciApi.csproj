@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\BaseApiController.cs" />
+    <Compile Remove="Core\Domain\Extensions\JsonExtension.cs" />
+    <Compile Remove="Core\Helpers\ErrorCodeResolver.cs" />
+    <Compile Remove="Core\Helpers\FibonacciHelper.cs" />
+    <Compile Remove="Core\Helpers\JsonHelper.cs" />
+    <Compile Remove="Core\Models\BaseResponse.cs" />
+    <Compile Remove="Core\Models\FibonacciResponse.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+    <PackageReference Include="Refit" Version="5.2.1" />
+  </ItemGroup>
+
+
+</Project>

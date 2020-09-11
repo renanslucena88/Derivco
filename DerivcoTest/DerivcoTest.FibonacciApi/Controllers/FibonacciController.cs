@@ -13,14 +13,10 @@ namespace DerivcoTest.FibonacciApi.Controllers
     [ApiController]
     public class FibonacciController : ControllerBase
     {
-        private readonly ILogger<FibonacciController> _logger;
-        private readonly ICacheFibonacciService _cacheService;
         private readonly IFibonacciService _service;
 
-        public FibonacciController(ILogger<FibonacciController> logger, ICacheFibonacciService cacheService, IFibonacciService service)
+        public FibonacciController( IFibonacciService service)
         {
-            _logger = logger;
-            _cacheService = cacheService;
             _service = service;
         }
 
@@ -30,14 +26,26 @@ namespace DerivcoTest.FibonacciApi.Controllers
         {
             try
             {
+                _service.ValidadeRequest(request);
+
                 var result = await _service.Fibonacci(request).ConfigureAwait(false);
 
                 return Ok(result);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
+        }
+
+        [HttpGet]
+        public IActionResult EndPointTest()
+        {
+            return Ok("I'm alive");
         }
     }
 }

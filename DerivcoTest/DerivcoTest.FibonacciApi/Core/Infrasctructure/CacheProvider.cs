@@ -6,7 +6,7 @@ namespace DerivcoTest.FibonacciApi.Core.Infrasctructure
 {
     public class CacheProvider : ICacheProvider
     {
-        private const int CacheSeconds = 100; // 100 Seconds
+        private readonly int CacheSeconds = Convert.ToInt32(Helpers.Config.GetValueFromKeyFromAppSetings("CacheOptions:CacheTime")); // 100 Seconds
 
         private readonly IMemoryCache _cache;
 

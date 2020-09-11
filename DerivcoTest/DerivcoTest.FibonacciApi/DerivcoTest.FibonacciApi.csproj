@@ -5,18 +5,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Core\Domain\Extensions\**" />
+    <Content Remove="Core\Domain\Extensions\**" />
+    <EmbeddedResource Remove="Core\Domain\Extensions\**" />
+    <None Remove="Core\Domain\Extensions\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Controllers\BaseApiController.cs" />
-    <Compile Remove="Core\Domain\Extensions\JsonExtension.cs" />
-    <Compile Remove="Core\Helpers\ErrorCodeResolver.cs" />
-    <Compile Remove="Core\Helpers\FibonacciHelper.cs" />
-    <Compile Remove="Core\Helpers\JsonHelper.cs" />
-    <Compile Remove="Core\Models\BaseResponse.cs" />
-    <Compile Remove="Core\Models\FibonacciResponse.cs" />
+    <Compile Remove="Core\Application\Models\BaseResponse.cs" />
+    <Compile Remove="Core\Application\Models\FibonacciResponse.cs" />
+    <Compile Remove="StartupClassAttribute.cs" />
+    <Compile Remove="StartupLoader.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-    <PackageReference Include="Refit" Version="5.2.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.8" />
+    <PackageReference Include="NSwag.AspNetCore" Version="13.7.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Documentation\Postman\" />
   </ItemGroup>
 
 

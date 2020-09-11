@@ -11,16 +11,9 @@ namespace DerivcoTest.FibonacciApi.Core.Models.Response
         {
             get
             {
-                if (_instance == null)
-                {
-                    return _instance = new BaseResponse();
-                }
-                return _instance;
+                return _instance ??= new BaseResponse();
             }
         }
-
-        [JsonPropertyName("Timeout")]
-        public bool TimeExeeded { get; set; }
 
         [JsonPropertyName("TimeExecutedMilliseconds")]
         public double TimeExecuted { get; set; }

@@ -1,5 +1,4 @@
-﻿using DerivcoTest.FibonacciApi.Core.Domain.Extensions;
-using DerivcoTest.FibonacciApi.Core.Domain.Interfaces;
+﻿using DerivcoTest.FibonacciApi.Core.Domain.Interfaces;
 using DerivcoTest.FibonacciApi.Core.Models.Request;
 using DerivcoTest.FibonacciApi.Core.Models.Response;
 using System;
@@ -13,30 +12,34 @@ namespace DerivcoTest.FibonacciApi.Core.Domain.Services
     public class FibonacciService : IFibonacciService
     {
         private readonly ICacheFibonacciService _cache;
-        private Stopwatch watch = new Stopwatch();
+        private readonly Stopwatch watch = new Stopwatch();
         private int timeOut;
         private int amountMemory;
         private bool useCache;
         private BigInteger[] arrFibonacci;
+        private bool error = false;
+        private bool errorTimeExeeded = false;
+        private bool errorOutOfMemory = false;
+        private string errorMessage = string.Empty;
 
         public FibonacciService(ICacheFibonacciService cache)
         {
             _cache = cache;
         }
 
-
+        public void ValidadeRequest(FibonacciRequest request)
+        {
+            new FibonacciRequest(request.FirstIndex, request.LastIndex, request.UseCache, request.TimeOfExecution, request.AmountMemory);
+        }
 
         public async Task<BaseResponse> Fibonacci(FibonacciRequest request)
         {
-            
             watch.Restart();
             BaseResponse response = BaseResponse.Instance;
             ErrorResponse errorResponse = ErrorResponse.Instance;
-            bool error = false;
-            string errorMessage = "";
+
             try
             {
-                response.TimeExeeded = false;
                 arrFibonacci = new BigInteger[request.LastIndex + 1];
 
                 if (request.LastIndex <= 1)
@@ -53,11 +56,26 @@ namespace DerivcoTest.FibonacciApi.Core.Domain.Services
                         timeOut = request.TimeOfExecution;
                         amountMemory = request.AmountMemory;
                         useCache = request.UseCache;
+
                         watch.Start();
-                        var token = CancellationToken.None;
-                        await FibonacciAsync(request.LastIndex).TimeoutAfter(timeOut, token).ConfigureAwait(false);
+                        CancellationTokenSource token = new CancellationTokenSource();
+                        token.CancelAfter(timeOut);
+
+                        await FibonacciAsync(request.LastIndex).ConfigureAwait(false);
                     }
                     catch (TimeoutException ex)
+                    {
+                        error = true;
+                        errorTimeExeeded = true;
+                        errorMessage = ex.Message;
+                    }
+                    catch (OutOfMemoryException ex)
+                    {
+                        error = true;
+                        errorOutOfMemory = true;
+                        errorMessage = ex.Message;
+                    }
+                    catch (StackOverflowException ex)
                     {
                         error = true;
                         errorMessage = ex.Message;
@@ -69,8 +87,9 @@ namespace DerivcoTest.FibonacciApi.Core.Domain.Services
                 if (error)
                 {
                     errorResponse.Description = errorMessage;
-                    errorResponse.TimeExeeded = error;
+                    errorResponse.TimeExceeded = errorTimeExeeded;
                     errorResponse.TimeExecuted = watch.Elapsed.TotalMilliseconds;
+                    errorResponse.MemoryExceeded = errorOutOfMemory;
                     return errorResponse;
                 }
 
@@ -81,7 +100,6 @@ namespace DerivcoTest.FibonacciApi.Core.Domain.Services
                 }
                 _cache.SetFibonacciCache(request.LastIndex, arrFibonacci);
 
-                response.TimeExeeded = error;
                 response.ResultWithIndex = PrepareResult(arrFibonacci, request.FirstIndex, request.LastIndex);
                 response.TimeExecuted = watch.Elapsed.TotalMilliseconds;
                 return response;
@@ -89,53 +107,68 @@ namespace DerivcoTest.FibonacciApi.Core.Domain.Services
             catch (TaskCanceledException)
             {
                 errorResponse.Description = errorMessage;
-                errorResponse.TimeExeeded = error;
+                errorResponse.TimeExceeded = error;
                 errorResponse.TimeExecuted = watch.Elapsed.TotalMilliseconds;
+                errorResponse.MemoryExceeded = errorOutOfMemory;
                 return errorResponse;
             }
         }
 
-        public async Task<BigInteger> FibonacciAsync(int n)
+        private async Task<BigInteger> FibonacciAsync(int n)
         {
-            BigInteger[] tmpResult = new BigInteger[2];
-
-            if (n <= 2)
+            try
             {
-                return 1;
-            }
-
-            if (arrFibonacci[n] > 0)
-            {
-                return arrFibonacci[n];
-            }
-
-            if (useCache)
-            {
-                var fibonacciSequenceCached = _cache.GetFibonacciCached(n);
-                if (fibonacciSequenceCached != null)
+                if (watch.ElapsedMilliseconds >= timeOut)
                 {
-                    for (int i = n; i > 0; i--)
-                    {
-                        arrFibonacci[i] = fibonacciSequenceCached[i];
-                    }
+                    throw new TimeoutException(string.Format("The operation exceeded {0} milliseconds", timeOut.ToString()));
+                }
+
+                if (amountMemory <= GC.GetTotalMemory(true) / 1024)
+                {
+                    throw new OutOfMemoryException(string.Format("Memory Exceeded"));
+                }
+
+                BigInteger[] tmpResult = new BigInteger[2];
+
+                if (n <= 2)
+                {
+                    return 1;
+                }
+
+                if (arrFibonacci[n] > 0)
+                {
                     return arrFibonacci[n];
+                }
+
+                if (useCache)
+                {
+                    var fibonacciSequenceCached = _cache.GetFibonacciCached(n);
+                    if (fibonacciSequenceCached != null)
+                    {
+                        for (int i = n; i > 0; i--)
+                        {
+                            arrFibonacci[i] = fibonacciSequenceCached[i];
+                        }
+                        return arrFibonacci[n];
+                    }
+                    else
+                    {
+                        arrFibonacci[n] = await FibonacciAsync(n - 1).ConfigureAwait(false) + await FibonacciAsync(n - 2).ConfigureAwait(false);
+                    }
                 }
                 else
                 {
-                    tmpResult = await Task.WhenAll(FibonacciAsync(n - 1), FibonacciAsync(n - 2)).ConfigureAwait(false);
+                    arrFibonacci[n] = await FibonacciAsync(n - 1).ConfigureAwait(false) + await FibonacciAsync(n - 2).ConfigureAwait(false);
                 }
+                return arrFibonacci[n];
             }
-
-            if (!useCache)
+            catch (StackOverflowException)
             {
-                tmpResult = await Task.WhenAll(FibonacciAsync(n - 1), FibonacciAsync(n - 2)).ConfigureAwait(false);
+                throw new StackOverflowException("StackOverFlow Error");
             }
-            arrFibonacci[n] = tmpResult[0] + tmpResult[1];
-
-            return arrFibonacci[n];
         }
 
-        public string[] PrepareResult(BigInteger[] arrTmpResult, int firstIndex, int lastIndex)
+        private string[] PrepareResult(BigInteger[] arrTmpResult, int firstIndex, int lastIndex)
         {
             string[] arrResult = new string[lastIndex - firstIndex + 1];
             int index = 0;

@@ -19,9 +19,9 @@ For the tests, I created a XUnit project with some tests to check Exceptions and
 ## **Documentation**
 ![](https://blogs.mulesoft.com/wp-content/uploads/postman-anypoint.png)
 
-**Documentation: ** The postman documentation with the correct body can be found [HERE](https://web.postman.co/collections/3658752-ad5e2632-a7d8-41cb-9d49-81957c1c67b9?version=latest)
+**Documentation: ** The postman documentation with the correct body can be found [HERE](https://documenter.getpostman.com/view/3658752/TVK5d1qs)
 
-**Tests Case: ** Also can be checked the test cases [HERE](https://web.postman.co/collections/3658752-aa1134ff-d83d-4108-b2b5-d471640e224e?version=latest&workspace=5583eef5-7f02-4608-8ce2-ab4b9a9acd05)
+**Tests Case: ** Also can be checked the test cases [HERE](https://documenter.getpostman.com/view/3658752/TVK5cLt3)
 
 
 ![](https://miro.medium.com/max/690/1*aKVg84SP5oPV9fwOnbl6yQ.png)

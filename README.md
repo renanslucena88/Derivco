@@ -37,13 +37,8 @@ The cache could be invalidated after a time period, where the period is defined 
 //END OF THE REQUERIMENTS
 
 
-On my solution, you will find very go Clean Code (DRY, Classes, Variables and Methods name), Principles, SOLID Principles, Designer Patterns (Builder, Singleton), DDD organization, async programming, recursive.
+On my solution, you will find Clean Code (DRY, Classes, Variables and Methods name), Principles, SOLID Principles, Designer Patterns (Builder, Singleton), DDD organization, async programming, recursive.
 
-The time of development was 3 nights and a half and I had to get some knowledge that I didn't have as in Swagger and Postman documentation.
-
-I decided to create using .NET Core because is a new technology and I'm applying to the newest projects that I've worked on.
-
-I tried to show the maximum of my knowledge applicable to this task, of course.
 
 For the tests, I created a XUnit project with some tests to check Exceptions and results using the AAA pattern.
 
